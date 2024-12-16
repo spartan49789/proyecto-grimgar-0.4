@@ -29,7 +29,7 @@ def create_new_item():
     new_Item = Item(IN)
     new_Item.Name = input("Insert the Name: ")
     new_Item.Description = input("Insert the Description: ")
-    new_Item.Type1 = int(input("Insert the first type (1-6)"))
+    new_Item.Type1 = int(input("Insert the first type (1-7)"))
     new_Item.Type2 = int(input("Insert the second type (1-4)"))
 
 # Usage example

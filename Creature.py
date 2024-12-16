@@ -19,7 +19,8 @@ class Creature:
             "Young Dragon": 4, "Wyvern": 4,
             "Dragon": 5
         }
-
+        
+        self.Tier = 1
         self.RM = RM[self.Race, 1]
         self.Status.Refresh(RM=self.RM)
 
