@@ -16,11 +16,11 @@ class Item:
 
         self.DB = 0
         self.maxDB = 0
-
-        self.Stats = [] # When ranged decide range and when AmmoStorage decides how much
+        
         self.Filled = 0 #For AmmoStorage
         self.Quantity = 0
-        
+
+        self.DamageTypes = []
         self.ItemDEFBonus = 0
         self.ItemPHYATKBonus = 0
         self.ItemMAGATKBonus = 0

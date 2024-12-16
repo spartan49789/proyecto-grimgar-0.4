@@ -52,6 +52,15 @@ class Status:
         
         self.TierRefresh()
 
+    def TrainingRefresh(self, RM = 2):
+        self.maxHP = self.CON*40*RM
+
+        self.maxMP = self.INT*100
+
+        self.maxSP = self.DEX*100
+        
+        self.TierRefresh()
+
     def TierRefresh(self):
         self.strT = GetTier(self.STR)
         self.conT = GetTier(self.CON)
