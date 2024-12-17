@@ -3,13 +3,14 @@ from tkinter import messagebox
 import pickle
 import os
 
+dark_theme = True
 # User class
 class User:
     def __init__(self, UK):
         self.UK = UK
         self.Name = ""
         self.Password = ""
-        self.SecurityLevel = 0  # 0: Owner, 1: Admin, 2: Narrator, 3: Player
+        self.SecurityLevel = 3  # 0: Owner, 1: Admin, 2: Narrator, 3: Player
         self.PCs = [None, None, None]  # Placeholder for PCs
 
 # Load or initialize user list
@@ -58,15 +59,49 @@ def main_window():
         for widget in window.winfo_children():
             widget.destroy()
 
+    def toggle_fullscreen(event=None):
+        is_fullscreen = window.attributes("-fullscreen")
+        window.attributes("-fullscreen", not is_fullscreen)
+
+    def toggle_theme():
+        nonlocal dark_theme
+        dark_theme = not dark_theme
+        apply_theme()
+
+    def apply_theme():
+        if dark_theme:
+            window.config(bg="#2e2e2e")
+            for widget in window.winfo_children():
+                if isinstance(widget, tk.Button):
+                    widget.config(bg="#3a3a3a", fg="white", bd=2, relief="solid", highlightbackground="#5a5a5a")
+                elif isinstance(widget, tk.Label):
+                    widget.config(bg="#2e2e2e", fg="white")
+                elif isinstance(widget, tk.Entry):
+                    widget.config(bg="#3a3a3a", fg="white", insertbackground="white")
+        else:
+            window.config(bg="white")
+            for widget in window.winfo_children():
+                if isinstance(widget, tk.Button):
+                    widget.config(bg="white", fg="black", bd=2, relief="solid", highlightbackground="black")
+                elif isinstance(widget, tk.Label):
+                    widget.config(bg="white", fg="black")
+                elif isinstance(widget, tk.Entry):
+                    widget.config(bg="white", fg="black", insertbackground="black")
+
+    def adaptive_font(widget, height_ratio):
+        widget_height = widget.winfo_height()
+        font_size = int(widget_height * height_ratio)
+        widget.config(font=("Arial", font_size))
+
     def show_login():
         clear_window()
-        tk.Label(window, text="Username:").pack()
+        tk.Label(window, text="Username:").place(relx=0.4, rely=0.3, relwidth=0.2, relheight=0.05)
         username_entry = tk.Entry(window)
-        username_entry.pack()
+        username_entry.place(relx=0.4, rely=0.35, relwidth=0.2, relheight=0.05)
 
-        tk.Label(window, text="Password:").pack()
+        tk.Label(window, text="Password:").place(relx=0.4, rely=0.4, relwidth=0.2, relheight=0.05)
         password_entry = tk.Entry(window, show="*")
-        password_entry.pack()
+        password_entry.place(relx=0.4, rely=0.45, relwidth=0.2, relheight=0.05)
 
         def verify_login(event=None):
             username = username_entry.get()
@@ -79,22 +114,22 @@ def main_window():
                 messagebox.showerror("Login Failed", "Invalid username or password.")
 
         verify_button = tk.Button(window, text="Verify", command=verify_login)
-        verify_button.pack()
+        verify_button.place(relx=0.4, rely=0.55, relwidth=0.2, relheight=0.05)
         window.bind("<Return>", verify_login)
 
     def show_signup():
         clear_window()
-        tk.Label(window, text="Create Username:").pack()
+        tk.Label(window, text="Create Username:").place(relx=0.4, rely=0.2, relwidth=0.2, relheight=0.05)
         username_entry = tk.Entry(window)
-        username_entry.pack()
+        username_entry.place(relx=0.4, rely=0.25, relwidth=0.2, relheight=0.05)
 
-        tk.Label(window, text="Password:").pack()
+        tk.Label(window, text="Password:").place(relx=0.4, rely=0.3, relwidth=0.2, relheight=0.05)
         password1_entry = tk.Entry(window, show="*")
-        password1_entry.pack()
+        password1_entry.place(relx=0.4, rely=0.35, relwidth=0.2, relheight=0.05)
 
-        tk.Label(window, text="Confirm Password:").pack()
+        tk.Label(window, text="Confirm Password:").place(relx=0.4, rely=0.4, relwidth=0.2, relheight=0.05)
         password2_entry = tk.Entry(window, show="*")
-        password2_entry.pack()
+        password2_entry.place(relx=0.4, rely=0.45, relwidth=0.2, relheight=0.05)
 
         def verify_signup(event=None):
             username = username_entry.get()
@@ -108,47 +143,60 @@ def main_window():
                 messagebox.showerror("Error", result)
 
         verify_button = tk.Button(window, text="Verify", command=verify_signup)
-        verify_button.pack()
+        verify_button.place(relx=0.4, rely=0.55, relwidth=0.2, relheight=0.05)
         window.bind("<Return>", verify_signup)
 
     def show_user_menu(user):
         clear_window()
 
-        # Create buttons based on SecurityLevel
+        # Button dimensions
+        button_width = 0.3
+        button_height = 0.1
+
+        # Centering buttons
+        x_center = 0.35
+
         if user.SecurityLevel <= 0:
-            tk.Button(window, text="Manage Users").pack()
+            tk.Button(window, text="Manage Users").place(relx=x_center, rely=0.2, relwidth=button_width, relheight=button_height)
         if user.SecurityLevel <= 1:
-            tk.Button(window, text="Manage Game").pack()
+            tk.Button(window, text="Manage Game").place(relx=x_center, rely=0.35, relwidth=button_width, relheight=button_height)
         if user.SecurityLevel <= 3:
-            tk.Button(window, text="Direct Messages").pack()
+            tk.Button(window, text="Direct Messages").place(relx=x_center, rely=0.5, relwidth=button_width, relheight=button_height)
 
-            pc_frame = tk.Frame(window)
-            pc_frame.pack()
+            # PC buttons
+            pc_frame = tk.Frame(window, bg=window.cget("bg"))
+            pc_frame.place(relx=x_center, rely=0.65, relwidth=button_width, relheight=button_height)
 
-            # PC buttons with checks for None
             pc1_label = user.PCs[0].Name if user.PCs[0] else "PC1"
-            tk.Button(pc_frame, text=pc1_label).pack(side=tk.LEFT)
+            tk.Button(pc_frame, text=pc1_label).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
             pc2_label = user.PCs[1].Name if user.PCs[1] else "PC2"
-            tk.Button(pc_frame, text=pc2_label).pack(side=tk.LEFT)
+            tk.Button(pc_frame, text=pc2_label).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
             pc3_label = user.PCs[2].Name if user.PCs[2] else "PC3"
-            tk.Button(pc_frame, text=pc3_label).pack(side=tk.LEFT)
+            tk.Button(pc_frame, text=pc3_label).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         if user.SecurityLevel <= 2:
-            tk.Button(window, text="Enter as a Narrator").pack()
+            tk.Button(window, text="Enter as a Narrator").place(relx=x_center, rely=0.8, relwidth=button_width, relheight=button_height)
 
-        tk.Button(window, text="Information").pack()
+        tk.Button(window, text="Information").place(relx=0.9, rely=0.05, relwidth=0.05, relheight=0.05)
 
     # Initial buttons
     clear_window()
-    tk.Button(window, text="Log In", command=show_login).pack()
-    tk.Button(window, text="Sign Up", command=show_signup).pack()
+    tk.Button(window, text="Log In", command=show_login).place(relx=0.4, rely=0.35, relwidth=0.2, relheight=0.05)
+    tk.Button(window, text="Sign Up", command=show_signup).place(relx=0.4, rely=0.45, relwidth=0.2, relheight=0.05)
+
+    # Theme toggle button
+    tk.Button(window, text="Toggle Theme", command=toggle_theme).place(relx=0.05, rely=0.05, relwidth=0.1, relheight=0.05)
+
+    window.bind("<Escape>", toggle_fullscreen)
 
 # Main application window
 window = tk.Tk()
 window.title("User Login System")
 window.geometry("300x200")
+window.attributes("-fullscreen", True)
+dark_theme = True
 main_window()
 window.mainloop()
 
