@@ -1,4 +1,4 @@
-from Money import Money
+from Classes.Money import Money
 
 class Backpack:
     def __init__(self, Creature):

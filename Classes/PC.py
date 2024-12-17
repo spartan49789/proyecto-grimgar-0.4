@@ -1,7 +1,7 @@
-from Backpack import Backpack
-from Creature import Creature
-from Equipment import Equipment
-from CharClass import CharClass
+from Classes.Backpack import Backpack
+from Classes.Creature import Creature
+from Classes.Equipment import Equipment
+from Classes.CharClass import CharClass
 from Chats.User import AsignedPC
 
 class PC:

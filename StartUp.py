@@ -5,6 +5,7 @@ import os
 
 from Chats.User import User, AsignedPC
 from PCStorage.PCAsignment import start_pc_creation
+from EnterAsCharacter import enter_as_character
 
 # Load or initialize user list
 USER_LIST_FILE = "user_list.pkl"
@@ -137,23 +138,27 @@ def main_window():
             pc_frame = tk.Frame(window, bg=window.cget("bg"))
             pc_frame.place(relx=x_center, rely=0.65, relwidth=button_width, relheight=button_height)
 
-            pc1_label = user.PCs[0].Name if user.PCs[0] else "PC1"
-            tk.Button(pc_frame, text=pc1_label, command=lambda: start_pc_creation(window, user, 0, save_user_list, show_user_menu) if not user.PCs[0] else None).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-            pc2_label = user.PCs[1].Name if user.PCs[1] else "PC2"
-            tk.Button(pc_frame, text=pc2_label, command=lambda: start_pc_creation(window, user, 1, save_user_list, show_user_menu) if not user.PCs[0] else None).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-            pc3_label = user.PCs[2].Name if user.PCs[2] else "PC3"
-            tk.Button(pc_frame, text=pc3_label, command=lambda: start_pc_creation(window, user, 2, save_user_list, show_user_menu) if not user.PCs[0] else None).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-
-
+            # Check for PC existence before trying to access its Name
+            for i in range(3):  # Loop over the 3 possible PCs
+                if user.PCs[i]:  # Only create a button if the PC exists
+                    tk.Button(
+                        pc_frame, 
+                        text=user.PCs[i].Name, 
+                        command=lambda i=i: enter_as_character(window, user, i)
+                    ).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+                else:
+                    tk.Button(
+                        pc_frame, 
+                        text="Empty Slot", 
+                        command=lambda i=i: start_pc_creation(window, user, i, show_user_menu)
+                    ).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            
         if user.SecurityLevel <= 2:
             tk.Button(window, text="Enter as a Narrator").place(relx=x_center, rely=0.8, relwidth=button_width, relheight=button_height)
 
         tk.Button(window, text="Info").place(relx=0.9, rely=0.05, relwidth=0.05, relheight=0.05)
-        tk.Button(window, text="Settigns").place(relx=0.1, rely=0.05, relwidth=0.05, relheight=0.05)
-
-    # Initial buttons
+        tk.Button(window, text="Settings").place(relx=0.1, rely=0.05, relwidth=0.05, relheight=0.05)
+            # Initial buttons
     clear_window()
     tk.Button(window, text="Log In", command=show_login).place(relx=0.4, rely=0.35, relwidth=0.2, relheight=0.05)
     tk.Button(window, text="Sign Up", command=show_signup).place(relx=0.4, rely=0.45, relwidth=0.2, relheight=0.05)
