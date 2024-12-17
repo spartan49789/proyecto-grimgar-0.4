@@ -1,4 +1,4 @@
-from Status import Status
+from Classes.Status import Status
 
 class Creature:
     def __init__(self, CN):
@@ -12,16 +12,20 @@ class Creature:
         self.actions = []
         self.Hunger = 0
         self.Time = 0
+        
+        self.Tier = 1
+        self.RM = 1
+        self.Status.Refresh(RM=self.RM)
 
+    def RefreshRM(self):
         RM = {
             "Human": 2, "Elf": 2, "Lizardman": 2, "Dwarf": 2,
             "Orc": 3, "Centaur": 3,
             "Young Dragon": 4, "Wyvern": 4,
             "Dragon": 5
         }
-        
-        self.Tier = 1
-        self.RM = RM[self.Race, 1]
+
+        self.RM = RM.get(self.Race, 1)
         self.Status.Refresh(RM=self.RM)
 
     def STRDMG(self):

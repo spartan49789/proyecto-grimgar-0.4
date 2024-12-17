@@ -30,6 +30,7 @@ class Status:
         self.maxSP = self.SP
 
         self.ActionP = 1
+        self.DefenseP = 1
         self.AbilityP = 1
         self.Movement = self.DEX*3
         self.PhyDMGBonus = 0
@@ -123,6 +124,8 @@ class Status:
                         self.CritChance = 30
                         if self.wisT >= 5:
                             self.LootDie = 4
+
+        self.DefenseP = self.ActionP
 
 def GetTier(num):
     if num >= 3:
