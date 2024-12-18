@@ -72,15 +72,15 @@ def start_pc_creation(window, user, pc_slot_index, show_user_menu, user_list):
         # Create a new PC and assign it
         new_pc = PC(ChK)
         new_pc.Creature.Name = pc_name
-        new_pc.Creature.RefreshRM()
 
         # Assign the stats to the PC
-        new_pc.Creature.Status.STR = stats["STR"]
-        new_pc.Creature.Status.CON = stats["CON"]
-        new_pc.Creature.Status.DEX = stats["DEX"]
-        new_pc.Creature.Status.INT = stats["INT"]
-        new_pc.Creature.Status.WIS = stats["WIS"]
-        new_pc.Creature.Status.CHA = stats["CHA"]
+        new_pc.Creature.Status.STR = round(stats["STR"], 2)
+        new_pc.Creature.Status.CON = round(stats["CON"], 2)
+        new_pc.Creature.Status.DEX = round(stats["DEX"], 2)
+        new_pc.Creature.Status.INT = round(stats["INT"], 2)
+        new_pc.Creature.Status.WIS = round(stats["WIS"], 2)
+        new_pc.Creature.Status.CHA = round(stats["CHA"], 2)
+        new_pc.Creature.RefreshRM()
 
         pc_list.append(new_pc)
 

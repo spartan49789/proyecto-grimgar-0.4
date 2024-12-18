@@ -208,7 +208,7 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
             msg_frame = tk.Frame(message_frame)
             msg_frame.pack(fill="x", pady=5)
 
-            tk.Label(msg_frame, text=message.Content, width=40, anchor="w").pack(side="left", fill="x")
+            tk.Label(msg_frame, text=message.Sender+": "+message.Body, width=40, anchor="w").pack(side="left", fill="x")
             tk.Button(msg_frame, text="Delete", command=lambda msg=message: delete_message(msg, chat)).pack(side="right")
 
         # Update right frame with chat details
@@ -286,6 +286,17 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
                 display_chat_details(chat)
 
         tk.Button(right_frame, text="Change Type", command=change_chat_type).pack(fill="x", pady=5)
+
+        # Delete Chat Button
+        def delete_chat():
+            confirm = messagebox.askyesno("Delete Chat", f"Are you sure you want to delete the chat '{chat.Name}'?")
+            if confirm:
+                chat_list.remove(chat)  # Remove chat from the list
+                save_chat_list(chat_list)  # Save the updated chat list to file
+                messagebox.showinfo("Success", f"Chat '{chat.Name}' deleted successfully.")
+                view_chats(window, chat_list, user, show_user_menu, user_list)  # Refresh the chat list
+
+        tk.Button(right_frame, text="Delete Chat", command=delete_chat).pack(fill="x", pady=5)
 
     def delete_message(message, chat):
         """Delete a message from the chat."""

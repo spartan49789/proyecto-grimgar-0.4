@@ -42,25 +42,27 @@ class Status:
         self.RangedBonus = 0
         
     def Refresh(self, RM = 2):
-        self.HP = self.CON*40*RM
+        self.HP = round(self.CON * 40 * RM, 2)
         self.maxHP = self.HP
 
-        self.MP = self.INT*100
+        self.MP = round(self.INT * 100, 2)
         self.maxMP = self.MP
 
-        self.SP = self.DEX*100
+        self.SP = round(self.DEX * 100, 2)
         self.maxSP = self.SP
-        
+
         self.TierRefresh()
+
 
     def TrainingRefresh(self, RM = 2):
-        self.maxHP = self.CON*40*RM
+        self.maxHP = round(self.CON * 40 * RM, 2)
 
-        self.maxMP = self.INT*100
+        self.maxMP = round(self.INT * 100, 2)
 
-        self.maxSP = self.DEX*100
-        
+        self.maxSP = round(self.DEX * 100, 2)
+
         self.TierRefresh()
+
 
     def TierRefresh(self):
         self.strT = GetTier(self.STR)

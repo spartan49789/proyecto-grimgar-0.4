@@ -61,48 +61,6 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-
-def radar_chart(canvas, stats, tiers, center_x, center_y, radius):
-    """Draws a radar chart on the given canvas (updated to match new chart style)."""
-    # Prepare data
-    labels = ['STR', 'DEX', 'CON', 'WIS', 'INT', 'CHA']
-    
-    # Normalize stats based on maximum value (similar to new chart)
-    max_stat_value = get_max_stat_value(stats)
-    stats = [stat / max_stat_value * 3 for stat in stats]  # Normalize values to fit within the range 0-3
-    
-    # Close the loop by repeating the first stat
-    stats += stats[:1]
-    
-    num_vars = len(labels)
-
-    # Calculate the angles for each axis (6 axes in total)
-    angles = [n / float(num_vars) * 2 * math.pi for n in range(num_vars)]
-    angles += angles[:1]  # Close the loop by adding the first angle
-
-    # Create the radar chart figure using matplotlib
-    fig, ax = plt.subplots(figsize=(4, 4), subplot_kw=dict(polar=True))
-
-    # Plot the radar chart: stats are plotted as a line and filled
-    ax.plot(angles, stats, linewidth=2, linestyle='solid', color="green", marker='o')
-    ax.fill(angles, stats, 'green', alpha=0.4)
-
-    # Set chart ticks and limits
-    ax.set_yticks(np.arange(0, 4, 1))  # Ticks every 1 unit, range [0, 3]
-    ax.set_ylim(0, 3)
-
-    # Add labels for each axis, with stats and tiers
-    ax.set_xticks(angles[:-1])  # Skip the last angle as it overlaps with the first
-    ax.set_xticklabels([f"{label}\n{value} (T{tier})" for label, value, tier in zip(labels, stats[:-1], tiers)])
-
-    # Embed the radar chart in the Tkinter window
-    canvas = FigureCanvasTkAgg(fig, master=canvas.winfo_toplevel())
-    canvas.draw()
-
-    # Place the radar chart in the Tkinter grid
-    canvas.get_tk_widget().pack(pady=10)
-    plt.close(fig)
-    
 def ShowSheet(self, frame):
     # Clear previous content
     for widget in frame.winfo_children():
@@ -119,26 +77,28 @@ def ShowSheet(self, frame):
     tk.Label(info_frame, text=f"{self.Gender}", font=("Arial", 10)).grid(row=0, column=1)
     tk.Label(info_frame, text=f"({self.Age})", font=("Arial", 10)).grid(row=0, column=2)
 
-    # HP, SP, MP
-    hp_label = tk.Label(frame, text=f"HP: ({self.Creature.Status.HP}/{self.Creature.Status.maxHP})")
-    sp_label = tk.Label(frame, text=f"SP: ({self.Creature.Status.SP}/{self.Creature.Status.maxSP})")
-    mp_label = tk.Label(frame, text=f"MP: ({self.Creature.Status.MP}/{self.Creature.Status.maxMP})")
-    hp_label.pack()
-    sp_label.pack()
-    mp_label.pack()
+    stats_frame = tk.Frame(frame)
+    stats_frame.pack(fill="x", pady=10)
 
-    # Radar Chart
-    canvas = tk.Canvas(frame, width=300, height=300, bg="white")
-    canvas.pack(pady=10)
-    stats = [
-        self.Creature.Status.STR,
-        self.Creature.Status.DEX,
-        self.Creature.Status.CON,
-        self.Creature.Status.WIS,
-        self.Creature.Status.INT,
-        self.Creature.Status.CHA
+    # Stat names row ("STR | DEX | CON | WIS | INT | CHA")
+    stat_names = ["STR", "DEX", "CON", "WIS", "INT", "CHA"]
+    for col, stat_name in enumerate(stat_names):
+        tk.Label(stats_frame, text=stat_name, font=("Arial", 12, "bold")).grid(row=0, column=col, padx=5)
+
+    # Stat values row (e.g., "strT | dexT | conT | wisT | intT | chaT")
+    stat_values = [
+        round(self.Creature.Status.STR, 2),
+        round(self.Creature.Status.DEX, 2),
+        round(self.Creature.Status.CON, 2),
+        round(self.Creature.Status.WIS, 2),
+        round(self.Creature.Status.INT, 2),
+        round(self.Creature.Status.CHA, 2)
     ]
-    tiers = [
+    for col, stat_value in enumerate(stat_values):
+        tk.Label(stats_frame, text=stat_value, font=("Arial", 12)).grid(row=1, column=col, padx=5)
+
+    # Stat tiers row (e.g., "strT | dexT | conT | wisT | intT | chaT")
+    stat_tiers = [
         self.Creature.Status.strT,
         self.Creature.Status.dexT,
         self.Creature.Status.conT,
@@ -146,28 +106,51 @@ def ShowSheet(self, frame):
         self.Creature.Status.intT,
         self.Creature.Status.chaT
     ]
-    radar_chart(canvas, stats, tiers, center_x=150, center_y=150, radius=100)
+    for col, stat_tier in enumerate(stat_tiers):
+        tk.Label(stats_frame, text=stat_tier, font=("Arial", 12)).grid(row=2, column=col, padx=5)
 
-    # Inventory Grid
-    table_frame = tk.Frame(frame)
-    table_frame.pack(fill="both", expand=True)
-    headers = ["Equipment", "Backpack", "Abilities", "Empty"]
-    for i, header in enumerate(headers):
-        ttk.Label(table_frame, text=header, font=("Arial", 10, "bold"), borderwidth=1, relief="solid").grid(row=0, column=i, sticky="nsew")
+    # Set column weights for even distribution
+    for col in range(6):  # 6 columns for the 6 stats
+        stats_frame.columnconfigure(col, weight=1)
 
-    # Fill table with dummy rows
-    for i in range(1, 11):
-        for j in range(4):
-            ttk.Label(table_frame, text="", borderwidth=1, relief="solid").grid(row=i, column=j, sticky="nsew")
+    # HP Label and Progress Bar
+    hp_label = tk.Label(frame, text=f"HP: ({self.Creature.Status.HP}/{self.Creature.Status.maxHP})")
+    hp_label.pack(fill="x", pady=5)
+    hp_bar = ttk.Progressbar(frame, length=300, maximum=self.Creature.Status.maxHP, value=self.Creature.Status.HP, mode="determinate")
+    hp_bar.pack(fill="x", pady=5)
+    hp_bar.config(style="green.Horizontal.TProgressbar")
 
-    # Make table stretchable
-    for i in range(4):
-        table_frame.columnconfigure(i, weight=1)
+    # SP Label and Progress Bar
+    sp_label = tk.Label(frame, text=f"SP: ({self.Creature.Status.SP}/{self.Creature.Status.maxSP})")
+    sp_label.pack(fill="x", pady=5)
+    sp_bar = ttk.Progressbar(frame, length=300, maximum=self.Creature.Status.maxSP, value=self.Creature.Status.SP, mode="determinate")
+    sp_bar.pack(fill="x", pady=5)
+    sp_bar.config(style="yellow.Horizontal.TProgressbar")
 
-def get_max_stat_value(stats):
-    max_stat = max(stats)
-    thresholds = [3, 5, 8, 11, 15, 20]
-    for threshold in thresholds:
-        if max_stat <= threshold:
-            return threshold
-    return thresholds[-1]
+    # MP Label and Progress Bar
+    mp_label = tk.Label(frame, text=f"MP: ({self.Creature.Status.MP}/{self.Creature.Status.maxMP})")
+    mp_label.pack(fill="x", pady=5)
+    mp_bar = ttk.Progressbar(frame, length=300, maximum=self.Creature.Status.maxMP, value=self.Creature.Status.MP, mode="determinate")
+    mp_bar.pack(fill="x", pady=5)
+    mp_bar.config(style="blue.Horizontal.TProgressbar")
+
+    # Inventory Buttons - Equipment, Backpack, Abilities, Actions
+    button_frame = tk.Frame(frame)
+    button_frame.pack(fill="x", pady=10)
+    
+    # Buttons for Equipment, Backpack, Abilities, and Actions
+    equipment_button = tk.Button(button_frame, text="Equipment")
+    equipment_button.pack(side="left", fill="x", expand=True)
+    
+    backpack_button = tk.Button(button_frame, text="Backpack")
+    backpack_button.pack(side="left", fill="x", expand=True)
+    
+    abilities_button = tk.Button(button_frame, text="Abilities")
+    abilities_button.pack(side="left", fill="x", expand=True)
+    
+    actions_button = tk.Button(button_frame, text="Actions")
+    actions_button.pack(side="left", fill="x", expand=True)
+
+    # Empty frame for spacing below buttons
+    empty_frame = tk.Frame(frame)
+    empty_frame.pack(fill="both", expand=True)

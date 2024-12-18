@@ -1,6 +1,6 @@
 import tkinter as tk
 from Chats.Message import Message
-from SaveAndLoadShit import load_pc_list, load_chat_list
+from SaveAndLoadShit import load_pc_list, load_chat_list, save_chat_list, save_pc_list
 from Classes.PC import ShowSheet
 
 def uniquePC(Assigned):
@@ -60,25 +60,26 @@ def enter_chat(chat, center_frame, PC):
     
     # Display Chat Name Label at the Top
     chat_name_label = tk.Label(center_frame, text=chat.Name, font=("Arial", 16, "bold"), bg="darkgrey", fg="black")
-    chat_name_label.pack(fill=tk.X, pady=5)
+    chat_name_label.pack(fill=tk.X, side=tk.TOP, pady=5)  # Ensure it stays at the top with side=tk.TOP
+
+    # Display chat messages and input box
+    display_chat_messages(center_frame, chat)
+    send_message(center_frame, chat, sender=PC.Creature.Name)
 
     # Display chat messages and input box
     display_chat_messages(center_frame, chat)
     send_message(center_frame, chat, sender=PC.Creature.Name)
 
 def display_chat_messages(center_frame, chat):
-    """Display all messages for the selected chat in the center frame."""
-    # Clear previous messages
+
     for widget in center_frame.winfo_children():
         widget.destroy()
 
-    # Text widget for displaying messages
     message_display = tk.Text(center_frame, wrap=tk.WORD, height=20, width=50)
     message_display.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
 
-    # Insert messages into the Text widget
     for message in chat.Messages:
-        message_display.insert(tk.END, f"{message.Time} - {message.Sender}: {message.Body}\n")
+        message_display.insert(tk.END, f"{message.Time} - {message.Sender}\n {message.Body}\n")
 
     message_display.config(state=tk.DISABLED)  # Make the text widget read-only
 
@@ -89,18 +90,29 @@ def send_message(center_frame, chat, sender):
     message_entry.pack(padx=5, pady=5)
 
     def on_send():
-        """Handle the message sending."""
         message_body = message_entry.get()
-        if message_body.strip():  # Ensure the message isn't empty
+        if message_body.strip():  
             new_message = Message(
                 MK=len(chat.Messages) + 1, 
                 Sender=sender, 
                 Chat=chat.Name, 
                 Body=message_body
             )
+            # Add the new message to the chat
             chat.Messages.append(new_message)
-            display_chat_messages(center_frame, chat)  # Refresh message display
+            
+            # Save the updated chat list to file
+            chat_list = load_chat_list()  # Load the current chat list
+            for i, c in enumerate(chat_list):
+                if c.Name == chat.Name:  # Find the matching chat by name
+                    chat_list[i] = chat  # Replace the chat with the updated one
+                    break
+            save_chat_list(chat_list)  # Save the updated chat list to the file
+
+            # Refresh the chat display
+            display_chat_messages(center_frame, chat)
             message_entry.delete(0, tk.END)  # Clear the entry field
+            enter_chat(chat, center_frame, sender)
 
     # Bind the "Enter" key to send the message
     message_entry.bind("<Return>", lambda event: on_send())
