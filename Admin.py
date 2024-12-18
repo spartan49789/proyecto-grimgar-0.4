@@ -179,6 +179,9 @@ def create_info_chat(window, user_list, chat_list, user, show_user_menu):
 
 
 
+import tkinter as tk
+from tkinter import messagebox, simpledialog
+
 def view_chats(window, chat_list, user, show_user_menu, user_list):
     PC_list = load_pc_list()
     """View chats grouped by type with dynamic layout."""
@@ -213,7 +216,7 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
     current_chat = None
 
     def display_chat_details(chat):
-        """Display chat details in the right frame and messages in center."""
+
         nonlocal current_chat
         current_chat = chat
 
@@ -234,50 +237,94 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
 
         # Update right frame with chat details
         tk.Label(right_frame, text=f"Topic: {chat.Topic}", anchor="w").pack(fill="x")
-        tk.Label(right_frame, text=f"Users: {', '.join([user.Username for user in chat.Users])}", anchor="w").pack(fill="x")
-        # Additional chat settings (for example, modify topic)
-        tk.Button(right_frame, text="Change Topic", command=lambda: change_chat_topic(chat)).pack(fill="x")
-        tk.Button(right_frame, text="Add User", command=lambda: add_user_to_chat(chat, user_list, PC_list)).pack(fill="x")
 
-    def change_chat_topic(chat):
-        """Change the topic of the selected chat."""
-        new_topic = simpledialog.askstring("Change Topic", "Enter new topic:")
-        if new_topic:
-            chat.Topic = new_topic
-            messagebox.showinfo("Success", "Topic changed successfully.")
+        # Display users in the chat
+        tk.Label(right_frame, text=f"Users: {', '.join([user.Name for user in chat.Users])}", anchor="w").pack(fill="x")
+        
+        # Add User/PC button (based on chat type)
+        tk.Label(right_frame, text="Select User or PC to Add:").pack(fill="x", pady=5)
+        
+        user_pc_listbox = tk.Listbox(right_frame)
+        
+        if chat.Topic == "Roleplay":
+            # Only show PCs if the chat is Roleplay
+            for pc in PC_list:
+                user_pc_listbox.insert(tk.END, f"{pc.Creature.CN} {pc.Creature.Name}")  # Display PC CN and Name
+        else:
+            # Show users if the chat is not Roleplay
+            for user in user_list:
+                user_pc_listbox.insert(tk.END, f"{user.UK} {user.Name}")  # Display User CN and Name
+                
+        user_pc_listbox.pack(fill="x", pady=5)
+
+        def add_user_pc():
+            selected = user_pc_listbox.get(tk.ACTIVE)
+
+            # Split to get CN and Name for users/PCs
+            selected_parts = selected.split(" ", 1)
+            selected_cn = selected_parts[0]
+            selected_name = selected_parts[1] if len(selected_parts) > 1 else None
+
+            # Check if it's a user or PC
+            if selected_cn in [user.CK for user in user_list]:
+                # It's a user
+                user_to_add = next((u for u in user_list if u.CN == selected_cn), None)
+                if user_to_add and selected_cn not in [user.CN for user in chat.Users]:  # Ensure user is not already added
+                    chat.Users.append(user_to_add.UK)  # Store User's UK
+                    messagebox.showinfo("Success", f"User {selected_cn} {selected_name} added to the chat.")
+                else:
+                    messagebox.showerror("Error", "User already added or not found!")
+            elif selected_cn in [pc.CN for pc in PC_list]:
+                # It's a PC and the topic is Roleplay
+                if chat.Topic == "Roleplay":
+                    pc_to_add = next((pc for pc in PC_list if pc.CN == selected_cn), None)
+                    if pc_to_add and selected_cn not in [pc.CN for pc in chat.Users]:  # Ensure PC is not already added
+                        chat.Users.append(pc_to_add.CHK)  # Store PC's CHK
+                        messagebox.showinfo("Success", f"PC {selected_cn} {selected_name} added to the chat.")
+                    else:
+                        messagebox.showerror("Error", "PC already added or not found!")
+                else:
+                    messagebox.showerror("Error", "Only PCs can be added to a Roleplay chat.")
+            else:
+                messagebox.showerror("Error", "Selected user or PC not found!")
+
+            user_pc_listbox.delete(user_pc_listbox.curselection())  # Remove selected user/PC from the list
+
+        tk.Button(right_frame, text="Add Selected", command=add_user_pc).pack(fill="x", pady=5)
+
+        # Change Chat Type Section
+        tk.Label(right_frame, text="Select Chat Type:").pack(fill="x", pady=5)
+        
+        chat_type_listbox = tk.Listbox(right_frame)
+        chat_type_listbox.insert(tk.END, "Info")
+        chat_type_listbox.insert(tk.END, "Group")
+        chat_type_listbox.insert(tk.END, "Roleplay")
+        chat_type_listbox.pack(fill="x", pady=5)
+
+        def change_chat_type():
+            selected_type = chat_type_listbox.get(tk.ACTIVE)
+            chat.Topic = selected_type
+            messagebox.showinfo("Success", f"Chat type changed to {selected_type}.")
+            
+            # Check if there's an active selection before calling delete
+            selection = chat_type_listbox.curselection()
+            if selection:
+                chat_type_listbox.delete(selection)  # Remove selected chat type from the list
+            else:
+                messagebox.showwarning("Warning", "No chat type selected!")
+            
             display_chat_details(chat)
 
-    def add_user_to_chat(chat, user_list, PC_list):
-        """Add a user or PC to the chat."""
-        if chat.Topic == "Info":
-            # Select from PCs list
-            selected_pc = simpledialog.askstring("Add PC", "Enter PC code to add:")
-            if selected_pc:
-                pc_to_add = next((pc for pc in PC_list if pc.CN == selected_pc), None)
-                if pc_to_add:
-                    chat.Users.append(pc_to_add.CHK)  # Append PC's CHK
-                    messagebox.showinfo("Success", f"PC {selected_pc} added to the chat.")
-                    display_chat_details(chat)
-                else:
-                    messagebox.showerror("Error", "PC not found!")
-        else:
-            # Select from User list
-            selected_user = simpledialog.askstring("Add User", "Enter username to add:")
-            if selected_user:
-                user_to_add = next((u for u in user_list if u.Username == selected_user), None)
-                if user_to_add:
-                    chat.Users.append(user_to_add.UK)  # Append User's UK
-                    messagebox.showinfo("Success", f"User {selected_user} added to the chat.")
-                    display_chat_details(chat)
-                else:
-                    messagebox.showerror("Error", "User not found!")
+        tk.Button(right_frame, text="Add Selected", command=add_user_pc).pack(fill="x", pady=5)
 
     def delete_message(message, chat):
+        """Delete a message from the chat."""
         chat.Messages.remove(message)
         messagebox.showinfo("Success", "Message deleted successfully.")
         display_chat_details(chat)
 
     def show_chat(chat):
+        """Display the selected chat."""
         display_chat_details(chat)
 
     # Left frame buttons to select a chat
