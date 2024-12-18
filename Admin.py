@@ -9,42 +9,38 @@ from Chats.Chats import Chat
 from Chats.Message import Message
 from Chats.Location import Location
 
-
+def saveChat(chat, chat_list):
+    chat_list[chat.CK] = chat
+    save_chat_list(chat_list)
 
 def Admin_menu(window, user, show_user_menu, user_list):
     location_list = load_Location_list()
     chat_list = load_chat_list()
-    """Admin menu that includes a button to manage chats."""
     for widget in window.winfo_children():
         widget.destroy()
 
     button_width = 0.2
     x_center = 0.4
 
-    # Chat Management Button
     tk.Button(
         window,
         text="Chat Management",
         command=lambda: Chat_Management_Menu(window, user, show_user_menu, user_list)
     ).place(relx=x_center, rely=0.3, relwidth=button_width, relheight=0.1)
 
-    # Go Back Button
     tk.Button(
         window,
         text="Go Back",
         command=lambda: show_user_menu(user)
     ).place(relx=x_center, rely=0.5, relwidth=button_width, relheight=0.1)
 
-    # Exit Button
     tk.Button(
         window,
         text="Exit",
         command=window.quit
     ).place(relx=x_center, rely=0.7, relwidth=button_width, relheight=0.1)
 
-
 def Chat_Management_Menu(window, user, show_user_menu, user_list):
-    """Menu for managing chats."""
     location_list = load_Location_list()
     chat_list = load_chat_list()
 
@@ -54,46 +50,37 @@ def Chat_Management_Menu(window, user, show_user_menu, user_list):
     button_width = 0.25
     x_center = 0.35
 
-    # Create Location Chat
     tk.Button(
         window,
         text="Create Location Chat",
         command=lambda: create_location_chat(window, location_list, chat_list, user, show_user_menu, user_list)
     ).place(relx=x_center, rely=0.2, relwidth=button_width, relheight=0.1)
 
-    # Create Group Chat
     tk.Button(
         window,
         text="Create Group Chat",
         command=lambda: create_group_chat(window, user_list, chat_list, user, show_user_menu)
     ).place(relx=x_center, rely=0.35, relwidth=button_width, relheight=0.1)
 
-    # Create Info Chat
     tk.Button(
         window,
         text="Create Info Chat",
         command=lambda: create_info_chat(window, user_list, chat_list, user, show_user_menu)
     ).place(relx=x_center, rely=0.5, relwidth=button_width, relheight=0.1)
 
-    # View Chats
     tk.Button(
         window,
         text="View Chats",
         command=lambda: view_chats(window, chat_list, user, show_user_menu, user_list)
     ).place(relx=x_center, rely=0.65, relwidth=button_width, relheight=0.1)
 
-    # Go Back Button
     tk.Button(
         window,
         text="Go Back",
         command=lambda: Admin_menu(window, user, show_user_menu, user_list)
     ).place(relx=x_center, rely=0.8, relwidth=button_width, relheight=0.1)
 
-
-
-
 def create_location_chat(window, location_list, chat_list, user, show_user_menu, user_list):
-    """Create a new location and its associated chat."""
     for widget in window.winfo_children():
         widget.destroy()
 
@@ -115,10 +102,10 @@ def create_location_chat(window, location_list, chat_list, user, show_user_menu,
         new_location = Location(location_name, parent_loc)
         location_list.append(new_location)
 
-        # Link Roleplay Chat to Location
-        new_chat = Chat(len(chat_list) + 1, new_location)
+        new_chat = Chat(len(chat_list) + 1, location_name, new_location)
         new_chat.Topic = "Roleplay"
         chat_list.append(new_chat)
+
         save_chat_list(chat_list)
         save_Location_list(location_list)
 
@@ -128,9 +115,7 @@ def create_location_chat(window, location_list, chat_list, user, show_user_menu,
     tk.Button(window, text="Create", command=create).pack()
     tk.Button(window, text="Cancel", command=lambda: Chat_Management_Menu(window, user, show_user_menu, user_list)).pack()
 
-
 def create_group_chat(window, user_list, chat_list, user, show_user_menu):
-    """Create a group chat."""
     for widget in window.winfo_children():
         widget.destroy()
 
@@ -140,9 +125,9 @@ def create_group_chat(window, user_list, chat_list, user, show_user_menu):
 
     def create():
         group_name = group_name_entry.get()
-        new_chat = Chat(len(chat_list) + 1)
+        new_chat = Chat(len(chat_list) + 1, group_name)
         new_chat.Topic = "Group"
-        new_chat.Users = user_list  # Add all users to the group chat
+        new_chat.Users = user_list
         chat_list.append(new_chat)
         save_chat_list(chat_list)
 
@@ -152,10 +137,7 @@ def create_group_chat(window, user_list, chat_list, user, show_user_menu):
     tk.Button(window, text="Create", command=create).pack()
     tk.Button(window, text="Cancel", command=lambda: Chat_Management_Menu(window, user, show_user_menu, user_list)).pack()
 
-
-
 def create_info_chat(window, user_list, chat_list, user, show_user_menu):
-    """Create an information chat."""
     for widget in window.winfo_children():
         widget.destroy()
 
@@ -165,22 +147,17 @@ def create_info_chat(window, user_list, chat_list, user, show_user_menu):
 
     def create():
         info_name = info_name_entry.get()
-        new_chat = Chat(len(chat_list) + 1)
+        new_chat = Chat(len(chat_list) + 1, info_name)
         new_chat.Topic = "Info"
-        new_chat.Users = [u for u in user_list if u.SecurityLevel <= 1]  # Restrict to specific users
+        new_chat.Users = [u for u in user_list if u.SecurityLevel <= 1]
         chat_list.append(new_chat)
+        save_chat_list(chat_list)
 
         messagebox.showinfo("Success", f"Info chat '{info_name}' was created!")
-        save_chat_list(chat_list)
         Chat_Management_Menu(window, user, show_user_menu, user_list)
 
     tk.Button(window, text="Create", command=create).pack()
     tk.Button(window, text="Cancel", command=lambda: Chat_Management_Menu(window, user, show_user_menu, user_list)).pack()
-
-
-
-import tkinter as tk
-from tkinter import messagebox, simpledialog
 
 def view_chats(window, chat_list, user, show_user_menu, user_list):
     PC_list = load_pc_list()
@@ -216,7 +193,6 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
     current_chat = None
 
     def display_chat_details(chat):
-
         nonlocal current_chat
         current_chat = chat
 
@@ -237,15 +213,13 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
 
         # Update right frame with chat details
         tk.Label(right_frame, text=f"Topic: {chat.Topic}", anchor="w").pack(fill="x")
-
-        # Display users in the chat
         tk.Label(right_frame, text=f"Users: {', '.join([user.Name for user in chat.Users])}", anchor="w").pack(fill="x")
-        
+
         # Add User/PC button (based on chat type)
         tk.Label(right_frame, text="Select User or PC to Add:").pack(fill="x", pady=5)
-        
+
         user_pc_listbox = tk.Listbox(right_frame)
-        
+
         if chat.Topic == "Roleplay":
             # Only show PCs if the chat is Roleplay
             for pc in PC_list:
@@ -254,7 +228,7 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
             # Show users if the chat is not Roleplay
             for user in user_list:
                 user_pc_listbox.insert(tk.END, f"{user.UK} {user.Name}")  # Display User CN and Name
-                
+
         user_pc_listbox.pack(fill="x", pady=5)
 
         def add_user_pc():
@@ -266,20 +240,22 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
             selected_name = selected_parts[1] if len(selected_parts) > 1 else None
 
             # Check if it's a user or PC
-            if selected_cn in [user.CK for user in user_list]:
+            if selected_cn in [user.UK for user in user_list]:
                 # It's a user
-                user_to_add = next((u for u in user_list if u.CN == selected_cn), None)
-                if user_to_add and selected_cn not in [user.CN for user in chat.Users]:  # Ensure user is not already added
-                    chat.Users.append(user_to_add.UK)  # Store User's UK
+                user_to_add = next((u for u in user_list if u.UK == selected_cn), None)
+                if user_to_add and user_to_add not in chat.Users:  # Ensure user is not already added
+                    chat.Users.append(user_to_add)
+                    saveChat(chat, chat_list)
                     messagebox.showinfo("Success", f"User {selected_cn} {selected_name} added to the chat.")
                 else:
                     messagebox.showerror("Error", "User already added or not found!")
-            elif selected_cn in [pc.CN for pc in PC_list]:
+            elif selected_cn in [pc.Creature.CN for pc in PC_list]:
                 # It's a PC and the topic is Roleplay
                 if chat.Topic == "Roleplay":
-                    pc_to_add = next((pc for pc in PC_list if pc.CN == selected_cn), None)
-                    if pc_to_add and selected_cn not in [pc.CN for pc in chat.Users]:  # Ensure PC is not already added
-                        chat.Users.append(pc_to_add.CHK)  # Store PC's CHK
+                    pc_to_add = next((pc for pc in PC_list if pc.Creature.CN == selected_cn), None)
+                    if pc_to_add and pc_to_add not in chat.Users:  # Ensure PC is not already added
+                        chat.Users.append(pc_to_add)
+                        saveChat(chat, chat_list)
                         messagebox.showinfo("Success", f"PC {selected_cn} {selected_name} added to the chat.")
                     else:
                         messagebox.showerror("Error", "PC already added or not found!")
@@ -294,7 +270,7 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
 
         # Change Chat Type Section
         tk.Label(right_frame, text="Select Chat Type:").pack(fill="x", pady=5)
-        
+
         chat_type_listbox = tk.Listbox(right_frame)
         chat_type_listbox.insert(tk.END, "Info")
         chat_type_listbox.insert(tk.END, "Group")
@@ -303,23 +279,18 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
 
         def change_chat_type():
             selected_type = chat_type_listbox.get(tk.ACTIVE)
-            chat.Topic = selected_type
-            messagebox.showinfo("Success", f"Chat type changed to {selected_type}.")
-            
-            # Check if there's an active selection before calling delete
-            selection = chat_type_listbox.curselection()
-            if selection:
-                chat_type_listbox.delete(selection)  # Remove selected chat type from the list
-            else:
-                messagebox.showwarning("Warning", "No chat type selected!")
-            
-            display_chat_details(chat)
+            if selected_type:
+                chat.Topic = selected_type
+                saveChat(chat, chat_list)
+                messagebox.showinfo("Success", f"Chat type changed to {selected_type}.")
+                display_chat_details(chat)
 
-        tk.Button(right_frame, text="Add Selected", command=add_user_pc).pack(fill="x", pady=5)
+        tk.Button(right_frame, text="Change Type", command=change_chat_type).pack(fill="x", pady=5)
 
     def delete_message(message, chat):
         """Delete a message from the chat."""
         chat.Messages.remove(message)
+        saveChat(chat, chat_list)
         messagebox.showinfo("Success", "Message deleted successfully.")
         display_chat_details(chat)
 
@@ -329,7 +300,7 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
 
     # Left frame buttons to select a chat
     for chat in chat_list:
-        button = tk.Button(left_frame, text=f"Chat ID: {chat.CK}", command=lambda chat=chat: show_chat(chat))
+        button = tk.Button(left_frame, text=chat.Name, command=lambda chat=chat: show_chat(chat))
         button.pack(fill="x", pady=5)
 
     # Add Go Back Button at the bottom of the left frame
@@ -339,5 +310,3 @@ def view_chats(window, chat_list, user, show_user_menu, user_list):
     # Update scrollregion after adding all messages
     message_frame.update_idletasks()
     canvas.config(scrollregion=canvas.bbox("all"))
-
-

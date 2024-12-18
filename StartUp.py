@@ -89,11 +89,11 @@ def main_window():
         username_entry = tk.Entry(window)
         username_entry.place(relx=0.4, rely=0.25, relwidth=0.2, relheight=0.05)
 
-        tk.Label(window, text="Password:").place(relx=0.4, rely=0.3, relwidth=0.2, relheight=0.05)
+        tk.Label(window, text="Password:", justify="center").place(relx=0.4, rely=0.3, relwidth=0.2, relheight=0.05)
         password1_entry = tk.Entry(window, show="*")
         password1_entry.place(relx=0.4, rely=0.35, relwidth=0.2, relheight=0.05)
 
-        tk.Label(window, text="Confirm Password:").place(relx=0.4, rely=0.4, relwidth=0.2, relheight=0.05)
+        tk.Label(window, text="Confirm Password:", justify="center").place(relx=0.4, rely=0.4, relwidth=0.2, relheight=0.05)
         password2_entry = tk.Entry(window, show="*")
         password2_entry.place(relx=0.4, rely=0.45, relwidth=0.2, relheight=0.05)
 
