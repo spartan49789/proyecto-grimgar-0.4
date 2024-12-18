@@ -176,7 +176,7 @@ def main_window():
 window = tk.Tk()
 window.title("User Login System")
 window.geometry("300x200")
-window.configure(bg="black")
+window.configure(bg="gray17")
 window.attributes("-fullscreen", True)
 main_window()
 window.mainloop()
