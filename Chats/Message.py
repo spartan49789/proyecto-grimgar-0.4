@@ -7,7 +7,6 @@ class Message:
         self.Time = now.strftime("%H:%M:%S")
         self.Date = now.strftime("%Y-%m-%d")
         self.Sender = Sender
-        self.Chat = Chat
         self.Body = Body
         self.PC = None
         self.Actions = []

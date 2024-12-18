@@ -5,3 +5,4 @@ class Chat:
         self.Topic = "" #Info, Group, Roleplay, DirectMessage
         self.Users = []
         self.MinPCTier = 1 #Only for Roleplay and Info
+        self.Messages = []

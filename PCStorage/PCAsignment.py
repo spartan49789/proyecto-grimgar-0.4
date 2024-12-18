@@ -1,12 +1,10 @@
 from tkinter import *
 from tkinter import messagebox
 from Classes.PC import PC
-from PCStorage.PCStorageManage import save_pc_list, load_pc_list
+from SaveAndLoadShit import save_user_list, save_pc_list, load_pc_list, load_user_list
 import tkinter as tk
-import time
 
-def start_pc_creation(window, user, pc_slot_index, show_user_menu):
-    # Clear the window
+def start_pc_creation(window, user, pc_slot_index, show_user_menu, user_list):
     for widget in window.winfo_children():
         widget.destroy()
     pc_list = load_pc_list()
@@ -29,12 +27,12 @@ def start_pc_creation(window, user, pc_slot_index, show_user_menu):
         "CHA": 1.0
     }
     free_points = 2
-
-    # Update the stat and free points, ensuring we don't go below zero for both stats and free points
+    # Create a label and button for each stat
     def update_stat(stat_name, amount):
+        
         nonlocal free_points
-        # Check valid conditions for updating stat and free points
-        if stats[stat_name] + amount >= 1 and (free_points - amount >= 0 or amount < 0):  # Allow going down to 0 if needed
+        # Update the stat and free points, ensuring we don't go below zero for both stats and free points
+        if stats[stat_name] + amount >= 1 and (free_points > 0):  # Allow going down to 0 if needed
             stats[stat_name] += amount
             free_points -= amount
             # Ensure free points do not go below 0
@@ -49,14 +47,6 @@ def start_pc_creation(window, user, pc_slot_index, show_user_menu):
             else:
                 create_pc_button.config(state=tk.DISABLED)
 
-    # Function to handle long-press for faster stat adjustment
-    def hold_stat_button(stat_name, amount):
-        nonlocal free_points
-        update_stat(stat_name, amount)
-        while free_points > 0 if amount > 0 else free_points < 2:
-            update_stat(stat_name, amount)
-            time.sleep(0.1)  # Adjust the speed of the update
-
     stat_labels = {}
     for idx, stat_name in enumerate(stats.keys()):
         # Display stat name and value
@@ -64,15 +54,8 @@ def start_pc_creation(window, user, pc_slot_index, show_user_menu):
         stat_labels[stat_name].place(relx=0.35, rely=0.3 + idx * 0.08, relwidth=0.2, relheight=0.05)  # Reduced vertical space
         
         # Increase and decrease buttons for each stat
-        increase_button = Button(window, text="+", command=lambda sn=stat_name: update_stat(sn, 0.05), width=2, height=1)
-        increase_button.place(relx=0.6, rely=0.3 + idx * 0.08, relwidth=0.05, relheight=0.05)
-
-        decrease_button = Button(window, text="-", command=lambda sn=stat_name: update_stat(sn, -0.05), width=2, height=1)
-        decrease_button.place(relx=0.65, rely=0.3 + idx * 0.08, relwidth=0.05, relheight=0.05)
-
-        # Bind holding buttons for faster adjustments
-        increase_button.bind("<Button-1>", lambda event, sn=stat_name: hold_stat_button(sn, 0.05))
-        decrease_button.bind("<Button-1>", lambda event, sn=stat_name: hold_stat_button(sn, -0.05))
+        Button(window, text="+", command=lambda sn=stat_name: update_stat(sn, 0.05)).place(relx=0.6, rely=0.3 + idx * 0.08, relwidth=0.05, relheight=0.05)
+        Button(window, text="-", command=lambda sn=stat_name: update_stat(sn, -0.05)).place(relx=0.65, rely=0.3 + idx * 0.08, relwidth=0.05, relheight=0.05)
 
     # Free Points Label
     free_points_label = Label(window, text=f"Free Points: {free_points:.2f}")
@@ -101,10 +84,13 @@ def start_pc_creation(window, user, pc_slot_index, show_user_menu):
 
         pc_list.append(new_pc)
 
+        # Assign PC to the user's slot and save changes
         user.PCs[pc_slot_index] = new_pc.AsignPC()
-        
-        save_pc_list(pc_list)  # Save the updated user list
-        messagebox.showinfo("Success", f"PC '{pc_name}' created successfully!")
+        save_user_list(user_list)  # Save the user list after assignment
+        save_pc_list(pc_list)
+    
+        messagebox.showinfo("Success", f"PC '{name_entry.get().strip()}' created successfully!")
+        user_list[user.UK - 1] = user
         show_user_menu(user)  # Return to the user menu
 
     # Create PC Button (Initially disabled)

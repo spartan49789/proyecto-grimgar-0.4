@@ -3,26 +3,15 @@ from tkinter import messagebox
 import pickle
 import os
 
+from Admin import Admin_menu
+from SaveAndLoadShit import save_user_list, load_user_list
 from Chats.User import User, AsignedPC
 from PCStorage.PCAsignment import start_pc_creation
 from EnterAsCharacter import enter_as_character
 
-# Load or initialize user list
-USER_LIST_FILE = "user_list.pkl"
-
-if os.path.exists(USER_LIST_FILE):
-    with open(USER_LIST_FILE, "rb") as file:
-        user_list = pickle.load(file)
-else:
-    user_list = []
-
-# Helper functions
-def save_user_list():
-    with open(USER_LIST_FILE, "wb") as file:
-        pickle.dump(user_list, file)
-
 # Log in functionality
-def login_verify(username, password):
+def login_verify(username, password, user_list):
+
     for user in user_list:
         if user.Name == username:
             if user.Password == password:
@@ -32,7 +21,8 @@ def login_verify(username, password):
     return None
 
 # Sign up functionality
-def create_user(username, password1, password2):
+def create_user(username, password1, password2, user_list):
+
     if password1 != password2:
         return "Passwords do not match!"
     if password1== "" or password2== "" or username == "":
@@ -46,11 +36,12 @@ def create_user(username, password1, password2):
     new_user.Name = username
     new_user.Password = password1
     user_list.append(new_user)
-    save_user_list()
+    save_user_list(user_list)
     return "User created successfully!"
 
 # GUI setup
 def main_window():
+    user_list = load_user_list()
     def clear_window():
         for widget in window.winfo_children():
             widget.destroy()
@@ -77,7 +68,7 @@ def main_window():
         def verify_login(event=None):
             username = username_entry.get()
             password = password_entry.get()
-            user = login_verify(username, password)
+            user = login_verify(username, password, user_list)
             if user:
                 messagebox.showinfo("Login Success", f"Welcome, {user.Name}!")
                 show_user_menu(user)
@@ -86,6 +77,10 @@ def main_window():
 
         verify_button = tk.Button(window, text="Verify", command=verify_login)
         verify_button.place(relx=0.4, rely=0.55, relwidth=0.2, relheight=0.05)
+
+        cancel_button = tk.Button(window, text="Cancel", command=main_window)
+        cancel_button.place(relx=0.4, rely=0.65, relwidth=0.2, relheight=0.05)
+
         window.bind("<Return>", verify_login)
 
     def show_signup():
@@ -106,7 +101,7 @@ def main_window():
             username = username_entry.get()
             password1 = password1_entry.get()
             password2 = password2_entry.get()
-            result = create_user(username, password1, password2)
+            result = create_user(username, password1, password2, user_list)
             if result == "User created successfully!":
                 messagebox.showinfo("Success", result)
                 show_login()
@@ -115,6 +110,10 @@ def main_window():
 
         verify_button = tk.Button(window, text="Verify", command=verify_signup)
         verify_button.place(relx=0.4, rely=0.55, relwidth=0.2, relheight=0.05)
+
+        cancel_button = tk.Button(window, text="Cancel", command=main_window)
+        cancel_button.place(relx=0.4, rely=0.65, relwidth=0.2, relheight=0.05)
+
         window.bind("<Return>", verify_signup)
 
     def show_user_menu(user):
@@ -130,7 +129,7 @@ def main_window():
         if user.SecurityLevel <= 0:
             tk.Button(window, text="Manage Users").place(relx=x_center, rely=0.2, relwidth=button_width, relheight=button_height)
         if user.SecurityLevel <= 1:
-            tk.Button(window, text="Manage Game").place(relx=x_center, rely=0.35, relwidth=button_width, relheight=button_height)
+            tk.Button(window, text="Manage Game", command=lambda: Admin_menu(window, user, show_user_menu, user_list)).place(relx=x_center, rely=0.35, relwidth=button_width, relheight=button_height)
         if user.SecurityLevel <= 3:
             tk.Button(window, text="Direct Messages").place(relx=x_center, rely=0.5, relwidth=button_width, relheight=button_height)
 
@@ -138,38 +137,46 @@ def main_window():
             pc_frame = tk.Frame(window, bg=window.cget("bg"))
             pc_frame.place(relx=x_center, rely=0.65, relwidth=button_width, relheight=button_height)
 
-            # Check for PC existence before trying to access its Name
             for i in range(3):  # Loop over the 3 possible PCs
-                if user.PCs[i]:  # Only create a button if the PC exists
+                if user.PCs[i]:
                     tk.Button(
-                        pc_frame, 
-                        text=user.PCs[i].Name, 
-                        command=lambda i=i: enter_as_character(window, user, i)
+                        pc_frame,
+                        text=user.PCs[i].Name,
+                        command=lambda i=i: enter_as_character(window, user, i, show_user_menu)
                     ).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
                 else:
                     tk.Button(
-                        pc_frame, 
-                        text="Empty Slot", 
-                        command=lambda i=i: start_pc_creation(window, user, i, show_user_menu)
+                        pc_frame,
+                        text="Empty Slot",
+                        command=lambda i=i: start_pc_creation(window, user, i, show_user_menu, user_list)
                     ).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-            
+
         if user.SecurityLevel <= 2:
             tk.Button(window, text="Enter as a Narrator").place(relx=x_center, rely=0.8, relwidth=button_width, relheight=button_height)
 
-        tk.Button(window, text="Info").place(relx=0.9, rely=0.05, relwidth=0.05, relheight=0.05)
-        tk.Button(window, text="Settings").place(relx=0.1, rely=0.05, relwidth=0.05, relheight=0.05)
-            # Initial buttons
+        logoff_button = tk.Button(window, text="Log Off", command=main_window)
+        logoff_button.place(relx=0.9, rely=0.05, relwidth=0.1, relheight=0.05)
+
+        info_button = tk.Button(window, text="Info")
+        info_button.place(relx=0.1, rely=0.2, relwidth=0.1, relheight=0.1)
+
+        settings_button = tk.Button(window, text="Settings")
+        settings_button.place(relx=0.1, rely=0.05, relwidth=0.1, relheight=0.1)
+
     clear_window()
     tk.Button(window, text="Log In", command=show_login).place(relx=0.4, rely=0.35, relwidth=0.2, relheight=0.05)
     tk.Button(window, text="Sign Up", command=show_signup).place(relx=0.4, rely=0.45, relwidth=0.2, relheight=0.05)
+    tk.Button(window, text="Exit", command=window.quit).place(relx=0.4, rely=0.55, relwidth=0.2, relheight=0.05)
 
     window.bind("<Escape>", toggle_fullscreen)
+
     
 
 # Main application window
 window = tk.Tk()
 window.title("User Login System")
 window.geometry("300x200")
+window.configure(bg="black")
 window.attributes("-fullscreen", True)
 main_window()
 window.mainloop()
