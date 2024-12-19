@@ -71,17 +71,22 @@ def enter_chat(chat, center_frame, PC):
     send_message(center_frame, chat, sender=PC.Creature.Name)
 
 def display_chat_messages(center_frame, chat):
-
+    """Display chat messages, starting from the latest at the bottom."""
     for widget in center_frame.winfo_children():
         widget.destroy()
 
     message_display = tk.Text(center_frame, wrap=tk.WORD, height=20, width=50)
     message_display.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
 
-    for message in chat.Messages:
-        message_display.insert(tk.END, f"{message.Time} - {message.Sender}\n {message.Body}\n")
+    # Insert messages in reverse order so latest appears at the bottom
+    for message in reversed(chat.Messages):  # Display from latest to oldest
+        message_display.insert(tk.END, f"{message.Time} - {message.Sender}\n {message.Body}\n\n")
 
     message_display.config(state=tk.DISABLED)  # Make the text widget read-only
+    
+    # Scroll the display to the bottom
+    message_display.see(tk.END)
+
 
 def send_message(center_frame, chat, sender):
     """Send a message from the character to the selected chat."""

@@ -29,15 +29,26 @@ class Backpack:
         for col, coin_name in enumerate(Coin_names):
             tk.Label(Money_frame, text=coin_name, font=("Arial", 12, "bold")).grid(row=0, column=col, padx=5)
 
-        # Coin Values
         Coin_values = [self.Money.Copper, self.Money.Silver, self.Money.Gold]
         for col, coin_value in enumerate(Coin_values):
-            tk.Label(Money_frame, text=coin_value, font=("Arial", 12)).grid(row=1, column=col, padx=5)
+            tk.Label(
+                Money_frame,
+                text=coin_value,
+                font=("Arial", 12),
+                anchor="center",  # Center-align text in the label
+                justify="center"  # Justify text centrally
+            ).grid(row=1, column=col, padx=5)
 
-        # Info Frame
         info_frame = tk.Frame(frame)
         info_frame.pack(fill="x", pady=5)  # Ensure it appears by packing it
-        tk.Label(info_frame, text=f"Weight: {self.W}/{self.maxW}", font=("Arial", 12)).pack(anchor="w", padx=10)
+        tk.Label(
+            info_frame,
+            text=f"Weight: {self.W}/{self.maxW}Kg",
+            font=("Arial", 12),
+            anchor="center",  # Center-align text in the label
+            justify="center"  # Justify text centrally
+        ).pack(anchor="center", padx=10)  # Align label to the center of the frame
+
 
         # Item Frame
         item_frame = tk.Frame(frame)
@@ -45,7 +56,6 @@ class Backpack:
 
         # Show Item List
         self.show_item_list(item_frame)
-
 
     def show_item_list(self, item_frame):
         # Clear the item_frame

@@ -1,4 +1,4 @@
-from Items import Item
+from Classes.ItemStorage.Items import Item
 
 def CreateItem(new_Item):
     new_Item.Weight = int(input("Introduce the weight (Kg): "))

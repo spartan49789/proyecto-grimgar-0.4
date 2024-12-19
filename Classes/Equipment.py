@@ -52,8 +52,12 @@ class Equipment:
             return f"{item.Name} unequipped from {slot}."
         return f"No item to unequip in {slot}."
 
-    def update_bonuses(self, item, equip=True):
-        """Update equipment bonuses based on the item."""
-        factor = 1 if equip else -1
-        self.DMGBonus += factor * item.DamageBonus
-        self.DEFBonus += factor * item.DefenseBonus
+    def update_bonuses(self):
+        self.DamageTypes = self.Hand1.DamageTypes
+        self.DMGBonus = self.Hand1.ItemPHYATKBonus + self.Hand2.ItemPHYATKBonus
+        self.DEFBonus = self.Head.ItemDEFBonus + self.Chest.ItemDEFBonus+ self.Arms.ItemDEFBonus+ self.Legs.ItemDEFBonus+ self.Shoulder.ItemDEFBonus+ self.Hand2.ItemDEFBonus
+        self.RangeStats = self.Hand1.RangeStats
+        self.manaBack = self.Hand1.ManaBack
+        self.MagDMGBonus = self.Hand1.ItemMAGATKBonus
+        self.SpellSlots = self.Hand1.SpellSlots
+        self.StoredSpells = self.Hand1.Spells

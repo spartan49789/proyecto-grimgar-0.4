@@ -60,3 +60,18 @@ def load_Location_list():
         location_list = []
 
     return location_list
+
+ITEM_LIST_FILE = "Item.pkl"
+
+def save_item_list(item_list):
+    with open(LOCA_LIST_FILE, "wb") as file:
+        pickle.dump(item_list, file)
+
+def load_item_list():
+    if os.path.exists(LOCA_LIST_FILE):
+        with open(LOCA_LIST_FILE, "rb") as file:
+            item_list = pickle.load(file)
+    else:
+        item_list = []
+
+    return item_list
