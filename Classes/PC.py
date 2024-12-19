@@ -139,17 +139,45 @@ def ShowSheet(self, frame):
     button_frame.pack(fill="x", pady=10)
     
     # Buttons for Equipment, Backpack, Abilities, and Actions
-    equipment_button = tk.Button(button_frame, text="Equipment")
+    equipment_button = tk.Button(button_frame, text="Equipment", command= lambda: on_Equipment_select(empty_frame))
     equipment_button.pack(side="left", fill="x", expand=True)
+
+    def on_Equipment_select(empty_frame):
+        equipment_button.config(bg="Gray17", fg="White")
+        backpack_button.config(bg="White", fg="Black")
+        abilities_button.config(bg="White", fg="Black")
+        actions_button.config(bg="White", fg="Black")
+        self.Backpack.ShowInfo(empty_frame)
     
-    backpack_button = tk.Button(button_frame, text="Backpack")
+    backpack_button = tk.Button(button_frame, text="Backpack", command= lambda: on_backpack_select(empty_frame))
     backpack_button.pack(side="left", fill="x", expand=True)
     
-    abilities_button = tk.Button(button_frame, text="Abilities")
-    abilities_button.pack(side="left", fill="x", expand=True)
+    def on_backpack_select(empty_frame):
+        equipment_button.config(bg="White", fg="Black")
+        backpack_button.config(bg="Gray17", fg="White")
+        abilities_button.config(bg="White", fg="Black")
+        actions_button.config(bg="White", fg="Black")
+        self.Backpack.ShowInfo(empty_frame)
     
-    actions_button = tk.Button(button_frame, text="Actions")
+    abilities_button = tk.Button(button_frame, text="Abilities", command= lambda: on_abilities_select(empty_frame))
+    abilities_button.pack(side="left", fill="x", expand=True)
+
+    def on_abilities_select(empty_frame):
+        equipment_button.config(bg="White", fg="Black")
+        backpack_button.config(bg="White", fg="Black")
+        abilities_button.config(bg="Gray17", fg="White")
+        actions_button.config(bg="White", fg="Black")
+        self.Backpack.ShowInfo(empty_frame)
+    
+    actions_button = tk.Button(button_frame, text="Actions", command= lambda: on_actions_select(empty_frame))
     actions_button.pack(side="left", fill="x", expand=True)
+
+    def on_actions_select(empty_frame):
+        equipment_button.config(bg="White", fg="Black")
+        backpack_button.config(bg="White", fg="Black")
+        abilities_button.config(bg="White", fg="Black")
+        actions_button.config(bg="Gray17", fg="White")
+        self.Backpack.ShowInfo(empty_frame)
 
     # Empty frame for spacing below buttons
     empty_frame = tk.Frame(frame)

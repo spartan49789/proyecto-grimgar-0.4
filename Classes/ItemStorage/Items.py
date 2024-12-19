@@ -12,7 +12,7 @@ class Item:
         #6- Holder
         #7- Ammo - Light Bolt - Heavy Bolt - Light Arrow - Heavy Arrow
         self.Type2 = 0
-        self.Space = [] # Where they go
+        self.Space = "" # Where they go
         self.Weight = 0
 
         self.DB = 0

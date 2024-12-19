@@ -170,8 +170,6 @@ def main_window():
 
     window.bind("<Escape>", toggle_fullscreen)
 
-    
-
 # Main application window
 window = tk.Tk()
 window.title("User Login System")
